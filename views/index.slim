@@ -1,0 +1,9 @@
+h1 All Birds
+p1 Click on bird to log it
+
+
+ol
+  - birds.each do |birds|
+    li 
+      a href="birds/#{birds['bird_id']}" #{birds["Bird_name"]}
+      

@@ -11,8 +11,18 @@ enable :sessions
 
 
 get('/')  do
-  slim(:start)
+  slim(:login, layout:false)
 end 
+
+post('/loggedin') do
+  session[:surname] = params[:surname]
+  session[:password] = params[:password]
+  redirect ('/site')
+end
+
+get('/site') do
+  slim(:start)
+end
 
 get('/profilsida') do
   slim(:profil)
@@ -32,6 +42,6 @@ get('/birds/:id') do
   db = SQLite3::Database.new("db/Databas.db")
   db.results_as_hash = true
   result = db.execute("SELECT * FROM birds WHERE Bird_id = ?",id).first
-  slim(:"birds/show",locals:{result:result})
+  slim(:show,locals:{result:result})
 end
 

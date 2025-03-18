@@ -8,6 +8,7 @@ enable :sessions
 def connect_to_db()
   db = SQLite3::Database.new("db/Databas.db")
   db.results_as_hash = true
+  return db
 end
 
 
@@ -26,7 +27,7 @@ post('/login')do
   db.results_as_hash = true
   result = db.execute("SELECT * FROM users WHERE username =?",username ).first 
   pwdigest = result["pwdigest"]
-  id = result["id"]
+  id = result["user_id"]
   if BCrypt::Password.new(pwdigest) == password
     session[:id] = id
     redirect('/site')
@@ -35,7 +36,7 @@ post('/login')do
   end 
 end
 
-post('/users/new') do
+post('/users_new') do
   username = params[:username]
   password = params[:password]
   password_confirm = params[:password_confirm]
@@ -64,20 +65,30 @@ get('/site') do
 end
 
 get('/profilsida') do
- 
-  slim(:profil)
+  if session[:id].nil?
+    redirect('/showlogin')
+  end
+  db = connect_to_db()
+  user_birds = db.execute("SELECT * FROM user_bird WHERE user_id = ?", [session[:id]])
+  slim(:profil, locals: { birds: user_birds })
+end
+
+post('/birds_new') do
+  if session[:id].nil?
+    redirect('/showlogin')
+  end
+
   bird_name = params[:bird_name]
   date = params[:date]
   comment = params[:comment]
-  location = params[:Location]
-  bird_id = params[:bird_id]
-  user_id = params[:user_id]  # Hämta användarens ID från formuläret
+  location = params[:location]
+  user_id = session[:id]  # Hämta användar-ID från sessionen
 
-  db = SQLite3::Database.new("db/Databas.db")
-  db.execute("INSERT INTO user_bird (bird_name, date, comment, location, bird_id, user_id) VALUES (?, ?, ?, ?, ?, ?)", [bird_id, date, comment, location, bird_id, user_id])
-  db.close
-  # result = db.execute("SELECT * from user_bird")
-  # p result
+  db = connect_to_db()
+  db.execute("INSERT INTO user_bird (bird_name, date, comment, location, user_id) VALUES (?, ?, ?, ?, ?)", 
+    [bird_name, date, comment, location, user_id])
+  
+  redirect('/profilsida')  # Skickar tillbaka användaren till sin profil
 end
 
 

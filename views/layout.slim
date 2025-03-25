@@ -6,14 +6,23 @@ html lang="en"
     meta http-equiv="X-UA-Compatible" content="ie=edge"/
     title Document
   body
-    nav
-      a href="/" Start it 
-      br
-      a href="/birds" Lägg till fågel
-      br
-      a href="/profilsida" Din profil
-      br
-      a href="/" Register
-      br
-      a href="/showlogin" Login
-    ==yield
+
+- if session[:id] == nil
+  nav
+    a href="/" Start it
+    br
+    a href="/register" Register
+    br
+    a href="/showlogin" Login
+- else
+  nav
+    a href="/" Start it
+    br
+    a href="/birds" Lägg till fågel
+    br
+    a href="/profilsida" Din profil
+    br
+    form action="logout" method="post"
+      input type="submit" value="Logout"
+
+== yield

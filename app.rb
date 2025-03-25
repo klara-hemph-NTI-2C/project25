@@ -13,8 +13,12 @@ end
 
 
 get('/')  do
-  slim(:register)
+  slim(:start)
 end 
+
+get('/register') do
+    slim(:register)
+end
 
 get('/showlogin') do
   slim(:login) 
@@ -36,21 +40,35 @@ post('/login')do
   end 
 end
 
+post('/logout') do
+  session[:id] = nil
+  redirect('/')
+end
+
 post('/users_new') do
   username = params[:username]
   password = params[:password]
   password_confirm = params[:password_confirm]
+
   p password
   p password_confirm
-  if (password == password_confirm)
-    #lägg till användare
+  if password == password_confirm
+    # Skapa hash av lösenordet
     password_digest = BCrypt::Password.create(password)
+
+    # Anslut till databasen
     db = SQLite3::Database.new('db/Databas.db')
-    db.execute('INSERT INTO users (username,pwdigest) VALUES (?, ?)',[username,password_digest])
+    db.execute('INSERT INTO users (username, pwdigest) VALUES (?, ?)', [username, password_digest])
+
+    # Omdirigera användaren efter registrering
     redirect('/')
   else
-    #felhantering
     "Lösenorden matchar ej"
+  end
+  if user && BCrypt::Password.new(user["pwdigest"]) == password
+    session[:id] = user["id"]  # Spara användarens ID i sessionen
+    session[:username] = user["username"]  # Spara användarnamnet i sessionen
+    redirect('/profilsida')
   end
 end
 
@@ -74,19 +92,22 @@ get('/profilsida') do
 end
 
 post('/birds_new') do
-  if session[:id].nil?
-    redirect('/showlogin')
-  end
-
   bird_name = params[:bird_name]
   date = params[:date]
   comment = params[:comment]
   location = params[:location]
   user_id = session[:id]  # Hämta användar-ID från sessionen
-
   db = connect_to_db()
-  db.execute("INSERT INTO user_bird (bird_name, date, comment, location, user_id) VALUES (?, ?, ?, ?, ?)", 
-    [bird_name, date, comment, location, user_id])
+
+  bird_id = db.execute("SELECT bird_id FROM birds WHERE Bird_name = ?", [bird_name]).map(&:dup)
+  i = 0
+  while i < bird_id.length
+    bird_id[i] = bird_id[i]["bird_id"]
+    i += 1
+  end
+  p [user_id, date, bird_id, bird_name, location, comment]
+  db = SQLite3::Database.new("db/Databas.db")
+  db.execute("INSERT INTO user_bird (user_id, date, bird_id, bird_name, location, comment) VALUES (?, ?, ?, ?, ?, ?)", [user_id, date, bird_id, bird_name, location, comment])
   
   redirect('/profilsida')  # Skickar tillbaka användaren till sin profil
 end

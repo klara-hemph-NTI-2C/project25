@@ -14,6 +14,9 @@ end
 
 get('/')  do
   slim(:start)
+  db = connect_to_db()
+  start_birds = db.execute("SELECT * FROM user_bird")
+  slim(:profil, locals: { birds: start_birds }) #VISAR TEXT FRÅN PROFILSLIM, ÅTGÄRDA HUR?
 end 
 
 get('/register') do
@@ -34,7 +37,7 @@ post('/login')do
   id = result["user_id"]
   if BCrypt::Password.new(pwdigest) == password
     session[:id] = id
-    redirect('/site')
+    redirect('/')
   else
     "FEL LÖSEN"
   end 
@@ -75,41 +78,61 @@ end
 post('/loggedin') do
   session[:surname] = params[:surname]
   session[:password] = params[:password]
-  redirect ('/site')
+  redirect ('/')
 end
 
-get('/site') do
-  slim(:start)
-end
+
 
 get('/profilsida') do
   if session[:id].nil?
     redirect('/showlogin')
   end
   db = connect_to_db()
+  db = SQLite3::Database.new("db/Databas.db")
+  db.results_as_hash = true
   user_birds = db.execute("SELECT * FROM user_bird WHERE user_id = ?", [session[:id]])
-  slim(:profil, locals: { birds: user_birds })
+  slim(:profil, locals: { birds: user_birds})
 end
 
 post('/birds_new') do
+  # bird_name = params[:bird_name]
+  # date = params[:date]
+  # comment = params[:comment]
+  # location = params[:location]
+  # user_id = session[:id]  # Hämta användar-ID från sessionen
+  # db = connect_to_db()
+ 
+  # bird_name_result = db.execute("SELECT bird_name FROM birds WHERE bird_id = ?", [bird_id]).first #ny
+
+  # bird_id = db.execute("SELECT bird_id FROM birds WHERE Bird_name = ?", [bird_name]).map(&:dup)
+  # i = 0
+  # while i < bird_id.length
+  #   bird_id[i] = bird_id[i]["bird_id"]
+  #   i += 1
+  # end
+  # p [user_id, date, bird_id, bird_name, location, comment]
+  # db = SQLite3::Database.new("db/Databas.db") #lägg in så användarnamnet också läggs till här
+  # db.execute("INSERT INTO user_bird (user_id,  date, bird_id, bird_name, location, comment) VALUES (?, ?, ?, ?, ?, ?)", [user_id, date, bird_id, bird_name, location, comment])
+  
+  # redirect('/profilsida')  # Skickar tillbaka användaren till sin profil
+  bird_id = params[:bird_id].to_i  # ID från URL eller formulär
   bird_name = params[:bird_name]
   date = params[:date]
   comment = params[:comment]
   location = params[:location]
-  user_id = session[:id]  # Hämta användar-ID från sessionen
-  db = connect_to_db()
+  user_id = session[:id]
 
-  bird_id = db.execute("SELECT bird_id FROM birds WHERE Bird_name = ?", [bird_name]).map(&:dup)
-  i = 0
-  while i < bird_id.length
-    bird_id[i] = bird_id[i]["bird_id"]
-    i += 1
-  end
-  p [user_id, date, bird_id, bird_name, location, comment]
+
   db = SQLite3::Database.new("db/Databas.db")
-  db.execute("INSERT INTO user_bird (user_id, date, bird_id, bird_name, location, comment) VALUES (?, ?, ?, ?, ?, ?)", [user_id, date, bird_id, bird_name, location, comment])
-  
-  redirect('/profilsida')  # Skickar tillbaka användaren till sin profil
+  db.results_as_hash = true
+  #db = connect_to_db()
+  #bird_name = db.execute("SELECT * FROM birds WHERE bird_id = ?",bird_id).first
+  #bird_name = db.execute("SELECT bird_name FROM birds WHERE bird_id = ?", bird_id).first
+  #bird_name = bird_name_result ? bird_name_result["bird_name"] : "Okänd fågel"
+
+  db.execute("INSERT INTO user_bird (user_id, date, bird_id, bird_name, Location, comment) VALUES (?, ?, ?, ?, ?, ?)", [user_id, date, bird_id, bird_name, location, comment])
+
+  redirect('/profilsida')  # Skicka tillbaka användaren till sin profil
 end
 
 

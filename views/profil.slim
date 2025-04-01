@@ -1,5 +1,5 @@
 h1 Din profil, här kan du se dina loggade fåglar, du är användare nummer #{session[:user_id]}!
 
 
-- birds.each do |bird|
+- birds.each do |bird| #Where username is ypur username typ
     p  datum: #{bird["date"]}, jag såg en:#{bird["bird_name"]}, i: #{bird["Location"]}, #{bird["comment"]} 

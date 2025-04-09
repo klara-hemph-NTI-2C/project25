@@ -1,23 +1,14 @@
-h1 Logga din fågel #{result["Bird_name"]}
+h1 Logga din #{result["Bird_name"]}
 
 
 form action="/birds_new" method="post"
-    input type="text" placeholder="fågelnamn" name="bird_name"/
-    br
+    input type="hidden" name="birdname" value="#{result["Bird_name"]}"
+
     input type="text" placeholder="location" name="location" /
     br
     input type="text" placeholder="kommentar" name="comment" /
     br
     input type="date"  placeholder="datum" name="date"/
     br
-    input type="file" placeholder="ladda upp bild" name="bild"/
-    br
     input type="submit" value="Skicka"
-
-      
-
-
-
-
-
 

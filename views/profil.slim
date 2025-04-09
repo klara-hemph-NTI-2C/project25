@@ -1,5 +1,9 @@
-h1 Din profil, här kan du se dina loggade fåglar, du är användare nummer #{session[:user_id]}!
+h1 Din profil, här kan du se dina loggade fåglar
 
 
 - birds.each do |bird| #Where username is ypur username typ
     p  datum: #{bird["date"]}, jag såg en:#{bird["bird_name"]}, i: #{bird["Location"]}, #{bird["comment"]} 
+
+    form action="/birds/#{bird["post_id"]}/delete" method="post"
+      button type="submit" onclick="return confirm('Är du säker på att du vill ta bort detta inlägg?')"
+        | Ta bort

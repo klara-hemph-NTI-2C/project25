@@ -1,3 +1,8 @@
 h2 Welcome to bird zite 
 p1 post your biiiirdz, här är alla fåglar som blivit postade! 
 
+h2 Senaste fågelinlägg
+
+- birds.each do |bird|
+  .bird-entry
+    p Fågel: #{bird["bird_name"]}, Datum: #{bird["date"]}, Plats: #{bird["Location"]}, Kommentar: #{bird["comment"]}
